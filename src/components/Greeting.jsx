@@ -27,20 +27,24 @@ export function Greeting({ name, role, className }) {
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className={cn("flex flex-col mb-1", className)}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn("flex flex-col mb-2", className)}
         >
-            <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-md uppercase tracking-[0.1em]">
-                    {roleMap[role] || role}
-                </span>
-                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 italic">
-                    {getGreetingMessage()}
+            <div className="flex items-center gap-3 mb-1.5">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-500/20 shadow-sm transition-all hover:shadow-indigo-500/10">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                        {roleMap[role] || role} Status
+                    </span>
+                </div>
+                <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-tight">
+                    • {getGreetingMessage()}
                 </span>
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-slate-800 dark:text-slate-200 tracking-tight">
-                <span className="text-slate-400 dark:text-slate-500 font-bold">안녕하세요,</span> {name}님
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">
+                {name} <span className="text-slate-400 dark:text-slate-500 font-bold tracking-tight">님, 반갑습니다. </span>
+                <span className="inline-block animate-bounce-slow">✨</span>
             </h2>
         </motion.div>
     );

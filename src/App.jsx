@@ -105,22 +105,25 @@ function SidebarIcon({ icon: Icon, label, active, onClick, badge }) {
     return (
         <button
             onClick={onClick}
-            className={`flex items-center gap-4 w-full px-4 py-4 rounded-[22px] transition-all duration-300 group relative ${active
-                ? 'bg-white dark:bg-slate-800 shadow-[0_10px_25px_-4px_rgba(99,102,241,0.12)] ring-1 ring-slate-100 dark:ring-slate-700'
-                : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50/50 dark:hover:bg-slate-800/50'
+            className={`flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl transition-all duration-300 group relative ${active
+                ? 'bg-indigo-500/10 dark:bg-white/5 ring-1 ring-indigo-500/20 dark:ring-white/10'
+                : 'text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5'
                 }`}
         >
-            <div className={`p-2.5 rounded-[16px] transition-all duration-500 shadow-sm ${active
-                ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-lg shadow-indigo-500/40 scale-110'
-                : 'bg-slate-50 dark:bg-slate-800 text-slate-400 group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:text-indigo-500 group-hover:shadow-md'
+            <div className={`p-2 rounded-xl transition-all duration-500 ${active
+                ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/40 scale-110'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white'
                 }`}>
-                <Icon size={20} />
+                <Icon size={18} />
             </div>
-            <span className={`text-[14px] font-bold tracking-tight transition-colors whitespace-nowrap ${active ? 'text-slate-900' : 'text-slate-400 group-hover:text-slate-700'}`}>
+            <span className={`text-[13px] font-black tracking-tight transition-colors whitespace-nowrap ${active ? 'text-indigo-600 dark:text-white' : 'text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'}`}>
                 {label}
             </span>
             {active && (
-                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.8)]" />
+                <motion.div 
+                    layoutId="sidebar-active"
+                    className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.8)]" 
+                />
             )}
         </button>
     );
@@ -527,9 +530,11 @@ export default function App() {
     }, [view]);
 
     const fontMap = {
-        'Gmarket': 'font-gmarket',
-        'Pretendard': 'font-pretendard',
-        'Inter': 'font-inter'
+        'Gmarket': 'font-style-Gmarket',
+        'Pretendard': 'font-style-Pretendard',
+        'IBM': 'font-style-IBM',
+        'Nanum': 'font-style-Nanum',
+        'Serif': 'font-style-Serif'
     };
 
     if (!session) {
@@ -568,15 +573,30 @@ export default function App() {
 
     return (
         <div className={`min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-600 dark:text-slate-400 flex flex-col md:flex-row overflow-x-hidden pb-20 md:pb-0 ${fontMap[fontFamily]}`}>
-            <aside className="hidden md:flex w-64 bg-white dark:bg-slate-900 border-r border-slate-200/60 dark:border-white/5 flex-col py-10 z-50 h-screen sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] px-6">
+            <aside className="hidden md:flex w-72 bg-white dark:bg-slate-950 border-r border-slate-200/60 dark:border-white/5 flex-col py-10 z-50 h-screen sticky top-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] px-6">
                 <div className="flex items-center gap-4 px-2 mb-12">
                     <div className="flex flex-col justify-center">
-                        <button onClick={() => setView('dashboard_team')} className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tighter leading-none hover:text-indigo-600 transition-colors text-left uppercase italic">
-                            {profile.companies?.name}
+                        <button onClick={() => setView('dashboard_team')} className="group flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/20 group-hover:rotate-12 transition-transform duration-500">
+                                <Gauge size={28} strokeWidth={3} />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter leading-none hover:text-indigo-600 transition-colors uppercase italic">
+                                    {profile.companies?.name || 'DASHBOARD'}
+                                </h1>
+                                <p className="text-[10px] font-bold text-slate-400 tracking-[0.3em] mt-1">BUSINESS BI OS</p>
+                            </div>
                         </button>
-                        <div className="mt-3 text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 flex items-center gap-1.5 w-max uppercase tracking-widest">
-                            <Shield size={10} />
-                            {profile.role === 'super_admin' ? 'Super Admin' : profile.role === 'admin' ? 'Admin Mode' : 'Staff Mode'}
+                        
+                        <div className="mt-6 flex items-center gap-1.5">
+                            <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
+                                profile.role === 'super_admin' 
+                                ? 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' 
+                                : 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-white/5 dark:text-slate-400 dark:border-white/10'
+                            }`}>
+                                {profile.role === 'super_admin' ? 'Master Core' : 'Staff Mode'}
+                            </div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
                         </div>
                     </div>
                 </div>

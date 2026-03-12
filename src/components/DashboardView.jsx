@@ -45,33 +45,41 @@ export function DashboardView({
     function CompactStat({ title, value, detail, icon: Icon, color, trend }) {
         const isPositive = trend >= 0;
         const colorMap = {
-            indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400',
-            emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400',
-            rose: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400',
-            amber: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
-            slate: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400',
-            violet: 'bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400',
-            blue: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400'
+            indigo: 'from-indigo-500/20 to-indigo-600/5 text-indigo-500 border-indigo-500/20',
+            emerald: 'from-emerald-500/20 to-emerald-600/5 text-emerald-500 border-emerald-500/20',
+            rose: 'from-rose-500/20 to-rose-600/5 text-rose-500 border-rose-500/20',
+            amber: 'from-amber-500/20 to-amber-600/5 text-amber-500 border-amber-500/20',
+            slate: 'from-slate-500/20 to-slate-600/5 text-slate-500 border-slate-500/20',
+            violet: 'from-violet-500/20 to-violet-600/5 text-violet-500 border-violet-500/20',
+            blue: 'from-blue-500/20 to-blue-600/5 text-blue-500 border-blue-500/20'
         };
 
         return (
-            <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200/60 dark:border-white/5 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-all group">
-                <div className={`p-2.5 rounded-xl ${colorMap[color] || colorMap.slate} transition-all group-hover:scale-110 duration-300 shadow-sm`}>
-                    <Icon size={18} />
+            <motion.div 
+                whileHover={{ y: -4, scale: 1.02 }}
+                className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 rounded-[24px] p-5 flex items-center gap-5 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 group overflow-hidden relative"
+            >
+                <div className={`absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br ${colorMap[color] || colorMap.slate} blur-3xl opacity-20 group-hover:opacity-40 transition-opacity`} />
+                <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${colorMap[color] || colorMap.slate} border shadow-inner transition-all group-hover:rotate-6 duration-500`}>
+                    <Icon size={22} strokeWidth={2.5} />
                 </div>
-                <div>
-                    <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-tight">{title}</p>
+                <div className="relative z-10">
+                    <p className="text-slate-400 dark:text-slate-500 text-[11px] font-black uppercase tracking-widest mb-1">{title}</p>
                     <div className="flex items-baseline gap-2">
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tighter">{value}</h3>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">{value}</h3>
                         {trend !== undefined && (
-                            <span className={`text-[10px] font-bold ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                {isPositive ? '↑' : '↓'}{(Math.abs(trend) || 0).toFixed(1)}%
-                            </span>
+                            <div className={`flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black ${isPositive ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                {isPositive ? <TrendingUp size={10} /> : <Activity size={10} />}
+                                {(Math.abs(trend) || 0).toFixed(1)}%
+                            </div>
                         )}
                     </div>
-                    <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-0.5 font-bold">{detail}</p>
+                    <p className="text-slate-400 dark:text-slate-400 text-[11px] mt-1.5 font-bold flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+                        {detail}
+                    </p>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
@@ -116,34 +124,57 @@ export function DashboardView({
             {useMemo(() => {
                 const sorted = [...drillDownData].sort((a, b) => b.achievement - a.achievement);
                 const best = sorted[0];
-                const achievementStatus = summary.achievementRate >= 100 ? '목표를 이미 달성했습니다! 🎉' :
-                    summary.achievementRate >= summary.progressRate ? '목표 달성을 향해 안정적으로 순항 중입니다.' : 
-                    '목표 진도율 대비 실적이 미달입니다. 점검이 필요합니다.';
+                const achievementStatus = summary.achievementRate >= 100 ? '목표 초과 달성! 🚀 비즈니스가 매우 강력하게 확장되고 있습니다.' :
+                    summary.achievementRate >= summary.progressRate ? '목표 진도율을 상회하며 순항 중입니다. 현재 페이스 유지가 중요합니다.' : 
+                    '목표 진도율 대비 실적이 일부 미달입니다. AI가 분석한 결과 특정 품목의 공급망 확인이 권장됩니다.';
                     
                 return (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-gradient-to-r from-indigo-500/5 to-purple-500/5 dark:from-indigo-500/10 dark:to-purple-500/10 border border-indigo-100 dark:border-white/5 rounded-3xl p-6 flex items-center gap-6 shadow-sm"
+                        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="relative overflow-hidden bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl border border-indigo-500/20 dark:border-indigo-400/10 rounded-[32px] p-6 flex flex-col md:flex-row items-center gap-6 shadow-2xl shadow-indigo-500/5 group"
                     >
-                        <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 border border-indigo-50 dark:border-white/5">
-                            <Sparkles size={24} className="animate-pulse" />
+                        {/* Shimmer effect background */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[2000ms] pointer-events-none" />
+                        
+                        <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white shrink-0 relative">
+                            <Sparkles size={32} className="animate-pulse" />
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800 animate-bounce" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mb-1">Weekly Intelligence Insight</p>
-                            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-                                <p className="text-[15px] font-bold text-slate-700 dark:text-slate-200 tracking-tight">
-                                    현재 <span className="text-indigo-600 dark:text-indigo-400 font-black">{achievementStatus}</span>
-                                </p>
-                                {best && (
-                                    <div className="hidden md:block w-[1px] h-4 bg-slate-200 dark:bg-slate-700" />
-                                )}
-                                {best && (
-                                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
-                                        최우수 성과: <span className="text-emerald-600 dark:text-emerald-400 font-black">{best.name}</span> ({fPercent(best.achievement)})
-                                    </p>
-                                )}
+                        
+                        <div className="flex-1 min-w-0 text-center md:text-left">
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
+                                <span className="px-3 py-1 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-indigo-500/20">
+                                    Smart Insight AI
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{currentTime} Analysis</span>
                             </div>
+                            
+                            <h4 className="text-[17px] font-black text-slate-800 dark:text-slate-100 tracking-tight leading-tight mb-2">
+                                {achievementStatus}
+                            </h4>
+                            
+                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                                {best && (
+                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 rounded-xl border border-emerald-500/10">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                                            최고 성과 부문: <span className="text-slate-900 dark:text-emerald-400 font-black">{best.name}</span>
+                                        </p>
+                                    </div>
+                                )}
+                                <p className="text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-indigo-500 transition-colors cursor-pointer flex items-center gap-1">
+                                    <Info size={14} /> 상세 AI 리포트 보기
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex flex-col items-center md:items-end justify-center px-6 md:border-l border-slate-200 dark:border-white/5">
+                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Efficency</p>
+                            <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-500 to-purple-500 tracking-tighter">
+                                {fPercent(summary.achievementRate)}
+                            </span>
                         </div>
                     </motion.div>
                 );
