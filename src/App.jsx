@@ -156,6 +156,9 @@ export default function App() {
     const fetchProfile = async (userId) => {
         setLoadingProfile(true);
         try {
+            // Get current user directly from Supabase for most reliable email check
+            const { data: { user } } = await supabase.auth.getUser();
+            
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*, companies(*)')
@@ -165,7 +168,7 @@ export default function App() {
             if (error) throw error;
 
             // [PROMOTION] Force super_admin for the master account
-            if (session?.user?.email === 'emasterdrs@gmail.com') {
+            if (user?.email === 'emasterdrs@gmail.com') {
                 data.role = 'super_admin';
             }
 
