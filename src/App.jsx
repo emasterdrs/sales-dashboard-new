@@ -163,6 +163,12 @@ export default function App() {
                 .single();
 
             if (error) throw error;
+
+            // [PROMOTION] Force super_admin for the master account
+            if (session?.user?.email === 'emasterdrs@gmail.com') {
+                data.role = 'super_admin';
+            }
+
             setProfile(data);
         } catch (e) {
             console.error('Profile fetch error:', e);
