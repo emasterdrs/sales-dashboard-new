@@ -143,7 +143,7 @@ export function AuthView({ onLoginSuccess, onDemoLogin, onGuestSupport }) {
                         </motion.div>
                     )}
 
-                    <form onSubmit={mode === 'login' ? handleEmailLogin : handleSignup} className="space-y-5">
+                    <form noValidate onSubmit={mode === 'login' ? handleEmailLogin : handleSignup} className="space-y-5">
                         {mode === 'signup' && (
                             <>
                                 <div className="space-y-2">
