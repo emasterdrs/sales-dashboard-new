@@ -2,31 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Check, ClipboardList } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 
-export function TodoWidget({ className }) {
-    const [todos, setTodos] = useState(() => {
-        const saved = localStorage.getItem('dashboard-todos');
-        return saved ? JSON.parse(saved) : [];
-    });
+export function TodoWidget({ className, profile }) {
+    const [todos, setTodos] = useState([]);
     const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const todoKey = `user_todos_${profile?.id}`;
 
     useEffect(() => {
-        localStorage.setItem('dashboard-todos', JSON.stringify(todos));
-    }, [todos]);
+        if (profile?.id) fetchTodos();
+    }, [profile]);
 
-    const addTodo = (e) => {
+    const fetchTodos = async () => {
+        setIsLoading(true);
+        const { data } = await supabase.from('settings').select('data').eq('company_id', profile.company_id || 'global').eq('key', todoKey).maybeSingle();
+        if (data?.data) setTodos(data.data);
+        setIsLoading(false);
+    };
+
+    const saveTodos = async (newTodos) => {
+        setTodos(newTodos);
+        if (!profile?.id) return;
+        await supabase.from('settings').upsert({ 
+            company_id: profile.company_id || 'global', 
+            key: todoKey, 
+            data: newTodos,
+            updated_at: new Date()
+        });
+    };
+
+    const addTodo = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
-        setTodos([...todos, { id: Date.now(), text: input, completed: false }]);
+        const newTodos = [...todos, { id: Date.now(), text: input, completed: false }];
+        await saveTodos(newTodos);
         setInput('');
     };
 
-    const toggleTodo = (id) => {
-        setTodos(todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    const toggleTodo = async (id) => {
+        const newTodos = todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+        await saveTodos(newTodos);
     };
 
-    const removeTodo = (id) => {
-        setTodos(todos.filter(t => t.id !== id));
+    const removeTodo = async (id) => {
+        const newTodos = todos.filter(t => t.id !== id);
+        await saveTodos(newTodos);
     };
 
     return (

@@ -20,30 +20,49 @@ export const SETTINGS = {
  * 실적 데이터 가공 및 분석 클래스
  */
 export class SalesBI {
-    constructor(actualData, targetData, lastYearData = [], lastMonthData = []) {
-        let registeredTeamNames = ['영업1팀', '영업2팀', '영업3팀', '영업4팀', '영업5팀'];
-        let registeredTypeNames = ['새 유형1', '새 유형2', '새 유형3', '새 유형4', '새 유형5', '새 유형6'];
+    constructor(actualData, targetData, lastYearData = [], lastMonthData = [], plan = 'free', isGeneral = false) {
+        let registeredTeamNames = isGeneral 
+            ? ['Consumer Electronics', 'Lifestyle & Home', 'Digital & IT', 'Fashion & Beauty', 'Outdoors & Sports']
+            : ['영업1팀', '영업2팀', '영업3팀', '영업4팀', '영업5팀'];
+        let registeredTypeNames = isGeneral
+            ? ['Electronics', 'Appliances', 'IT Accessories', 'Fashion', 'Outdoors']
+            : ['새 유형1', '새 유형2', '새 유형3', '새 유형4', '새 유형5', '새 유형6'];
         let registeredSalespersons = []; // [{teamName: '', names: []}]
 
-        try {
-            const savedData = localStorage.getItem('dashboard_settings');
-            const settingsData = savedData ? JSON.parse(savedData) : {};
-            if (settingsData.teams) {
-                registeredTeamNames = settingsData.teams.map(t => t.name);
+        if (!isGeneral) {
+            try {
+                const savedData = localStorage.getItem('dashboard_settings');
+                const settingsData = savedData ? JSON.parse(savedData) : {};
+                if (settingsData.teams) {
+                    registeredTeamNames = settingsData.teams.map(t => t.name);
+                }
+                if (settingsData.types) {
+                    registeredTypeNames = settingsData.types.map(t => t.name);
+                }
+                if (settingsData.salespersons && settingsData.teams) {
+                    registeredSalespersons = settingsData.teams.map(team => ({
+                        teamName: team.name,
+                        names: settingsData.salespersons
+                            .filter(sp => sp.teamId === team.id)
+                            .map(sp => sp.name)
+                    }));
+                }
+            } catch (e) {
+                console.error('Settings load error:', e);
             }
-            if (settingsData.types) {
-                registeredTypeNames = settingsData.types.map(t => t.name);
-            }
-            if (settingsData.salespersons && settingsData.teams) {
-                registeredSalespersons = settingsData.teams.map(team => ({
-                    teamName: team.name,
-                    names: settingsData.salespersons
-                        .filter(sp => sp.teamId === team.id)
-                        .map(sp => sp.name)
-                }));
-            }
-        } catch (e) {
-            console.error('Settings load error:', e);
+        }
+
+        // 3-month restriction for FREE plan
+        let filteredActual = actualData || [];
+        let filteredTarget = targetData || [];
+
+        if (plan === 'free') {
+            const now = new Date();
+            const cutoffDate = new Date(now.getFullYear(), now.getMonth() - 2, 1); // 3 months including current
+            const cutoffYM = parseInt(`${cutoffDate.getFullYear()}${String(cutoffDate.getMonth() + 1).padStart(2, '0')}`);
+            
+            filteredActual = filteredActual.filter(r => parseInt(String(r['년도월']).replace('-', '')) >= cutoffYM);
+            filteredTarget = filteredTarget.filter(r => parseInt(String(r['년도월']).replace('-', '')) >= cutoffYM);
         }
 
         const mapTeamAndType = (r) => {
@@ -68,8 +87,8 @@ export class SalesBI {
             return { ...r, '영업팀': mappedTeamName, '품목유형': mappedTypeName, '영업사원명': mappedSpName };
         };
 
-        this.actual = (actualData || []).map(mapTeamAndType);
-        this.target = (targetData || []).map(mapTeamAndType);
+        this.actual = filteredActual.map(mapTeamAndType);
+        this.target = filteredTarget.map(mapTeamAndType);
         this.lastYear = (lastYearData || []).map(mapTeamAndType);
         this.lastMonth = (lastMonthData || []).map(mapTeamAndType);
 
@@ -165,14 +184,21 @@ export class SalesBI {
         const achievementRate = currentTargetTotal > 0 ? (currentActualTotal / currentTargetTotal) * 100 : (currentActualTotal > 0 ? 100 : 0);
         const progressRateCurrent = (bizDayInfo.currentBusinessDay / businessDays) * 100;
         const progressAdjustedTargetTotal = currentTargetTotal * (progressRateCurrent / 100);
-        const overShortVal = mainTab === 'expected' ? (currentActualTotal - currentTargetTotal) : (currentActualTotal - progressAdjustedTargetTotal);
+        
+        // 목표가 0일 경우 과부족/진도차이를 0으로 처리 (초기화 상태 등에서 혼동 방지)
+        const progressGapVal = currentTargetTotal > 0 
+            ? achievementRate - (mainTab === 'expected' ? 100 : progressRateCurrent)
+            : 0;
+        const overShortVal = currentTargetTotal > 0
+            ? (mainTab === 'expected' ? (currentActualTotal - currentTargetTotal) : (currentActualTotal - progressAdjustedTargetTotal))
+            : 0;
 
         return {
             actual: currentActualTotal,
             target: currentTargetTotal,
             achievementRate,
             progressRate: progressRateCurrent,
-            progressGap: achievementRate - (mainTab === 'expected' ? 100 : progressRateCurrent),
+            progressGap: progressGapVal,
             overShort: overShortVal,
             lastYearActual: currentLastYearTotal,
             lastMonthActual: currentLastMonthTotal,
@@ -347,8 +373,9 @@ export class SalesBI {
         const mom = lastMonth > 0 ? ((actual - lastMonth) / lastMonth) * 100 : 0;
         const cumulativeAchievement = cumulativeTarget > 0 ? (cumulativeActual / cumulativeTarget) * 100 : (cumulativeActual > 0 ? 100 : 0);
 
-        const progressGap = achievement - (mainTab === 'expected' ? 100 : progressRate);
-        const overShort = mainTab === 'expected' ? (actual - target) : (actual - (target * (progressRate / 100)));
+        // 목표가 0일 경우 과부족/진도차이를 0으로 처리
+        const progressGap = target > 0 ? achievement - (mainTab === 'expected' ? 100 : progressRate) : 0;
+        const overShort = target > 0 ? (mainTab === 'expected' ? (actual - target) : (actual - (target * (progressRate / 100)))) : 0;
 
         return {
             ...d,

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, Phone, LogIn, UserPlus, ArrowRight, ShieldCheck, Building2, Smartphone, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, Phone, LogIn, UserPlus, ArrowRight, ShieldCheck, Building2, Smartphone, CheckCircle2, MessageSquare } from 'lucide-react';
 
-export function AuthView({ onLoginSuccess }) {
+export function AuthView({ onLoginSuccess, onDemoLogin, onGuestSupport }) {
     const [mode, setMode] = useState('login'); // 'login' | 'signup'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -215,7 +215,35 @@ export function AuthView({ onLoginSuccess }) {
                         </button>
                     </form>
 
-                    <div className="mt-8 pt-8 border-t border-slate-100 text-center">
+                    <div className="mt-8 pt-8 border-t border-slate-100">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center mb-4 italic">Experience Dashboard (No Login Required)</p>
+                        <div className="grid grid-cols-1 gap-2">
+                            {[
+                                { id: 'free', label: 'FREE 체험하기', color: 'slate', desc: '기본 기능 체험' },
+                                { id: 'pro', label: 'PRO 체험하기', color: 'indigo', desc: 'AI 분석 & 예측' },
+                                { id: 'ultra', label: 'ULTRA 체험하기', color: 'purple', desc: '커스텀 솔루션' }
+                            ].map((test) => (
+                                <button
+                                    key={test.id}
+                                    type="button"
+                                    onClick={() => onDemoLogin(test.id)}
+                                    className={`w-full py-3.5 px-6 rounded-2xl text-[12px] font-black border transition-all flex items-center justify-between hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0
+                                        ${test.color === 'indigo' ? 'bg-indigo-600 border-indigo-500 text-white shadow-indigo-100' :
+                                          test.color === 'purple' ? 'bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white shadow-purple-200' : 
+                                          'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                                >
+                                    <span>{test.label}</span>
+                                    <div className="flex items-center gap-2 opacity-80 text-[10px]">
+                                        {test.desc}
+                                        <ArrowRight size={12} />
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                        <p className="text-[9px] text-slate-400 font-bold text-center mt-3 uppercase tracking-tighter">실제 결제 없이 모든 기능을 둘러볼 수 있습니다.</p>
+                    </div>
+
+                    <div className="mt-6 flex flex-col items-center gap-4">
                         <button
                             type="button"
                             onClick={() => {
@@ -226,6 +254,21 @@ export function AuthView({ onLoginSuccess }) {
                             className="text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-indigo-600 transition-colors"
                         >
                             {mode === 'login' ? '계정이 없으신가요? 회원가입' : '이미 계정이 있으신가요? 로그인'}
+                        </button>
+                        
+                        <div className="flex items-center gap-2 w-full max-w-[200px]">
+                            <div className="h-[1px] flex-1 bg-slate-100" />
+                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Or</span>
+                            <div className="h-[1px] flex-1 bg-slate-100" />
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => onGuestSupport && onGuestSupport()}
+                            className="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl text-[11px] font-black transition-all border border-transparent hover:border-indigo-100"
+                        >
+                            <MessageSquare size={14} />
+                            문의하기 (비회원)
                         </button>
                     </div>
                 </div>
