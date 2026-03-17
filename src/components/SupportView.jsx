@@ -59,7 +59,7 @@ export function SupportView({ profile, onBack, triggerToast, isDemo, isGuest }) 
             
             // 핵심 보안 로직: 관리자가 아니면 '내 글'만 보임 (다른 사람의 메타데이터조차 전송 안됨)
             if (!isSuperAdmin) {
-                const userId = (profile?.id && String(profile.id).includes('demo')) ? null : profile.id;
+                const userId = (profile?.id && String(profile?.id).includes('demo')) ? null : profile?.id;
                 const userEmail = profile?.email;
 
                 if (userId && userEmail) {
@@ -92,7 +92,7 @@ export function SupportView({ profile, onBack, triggerToast, isDemo, isGuest }) 
         setIsSubmitting(true);
         
         try {
-            const userId = (profile?.id && String(profile.id).includes('demo')) ? null : profile.id;
+            const userId = (profile?.id && String(profile?.id).includes('demo')) ? null : profile?.id;
 
             const payload = {
                 user_id: userId,
@@ -161,7 +161,7 @@ export function SupportView({ profile, onBack, triggerToast, isDemo, isGuest }) 
                     reply: replyContent, 
                     status: 'completed',
                     replied_at: new Date().toISOString(),
-                    replied_by: profile.id
+                    replied_by: profile?.id
                 })
                 .eq('id', selectedInquiry.id);
             
