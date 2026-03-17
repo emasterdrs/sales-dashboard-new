@@ -19,19 +19,30 @@ export function Sidebar({ view, setView, profile, isDemo, settingsSubView, setSe
             </div>
 
             <nav className="flex-1 space-y-2">
-                <SidebarItem active={view === 'dashboard_team'} icon={BarChart3} label="매출 실적 (팀별)" onClick={() => setView('dashboard_team')} />
-                <SidebarItem active={view === 'dashboard_type'} icon={PieChartIcon} label="매출 실적 (유형별)" onClick={() => setView('dashboard_type')} />
-                <SidebarItem active={view === 'dashboard_custom'} icon={LayoutGrid} label={profile.plan === 'pro' ? "커스텀" : "커스텀 (PRO)"} onClick={() => profile.plan === 'pro' ? setView('dashboard_custom') : setView('pricing')} />
+                {profile.role !== 'super_admin' && (
+                    <>
+                        <SidebarItem active={view === 'dashboard_team'} icon={BarChart3} label="매출 실적 (팀별)" onClick={() => setView('dashboard_team')} />
+                        <SidebarItem active={view === 'dashboard_type'} icon={PieChartIcon} label="매출 실적 (유형별)" onClick={() => setView('dashboard_type')} />
+                        <SidebarItem active={view === 'dashboard_custom'} icon={LayoutGrid} label={profile.plan === 'pro' ? "커스텀" : "커스텀 (PRO)"} onClick={() => profile.plan === 'pro' ? setView('dashboard_custom') : setView('pricing')} />
+                    </>
+                )}
+
+                {profile.role === 'super_admin' && (
+                    <SidebarItem active={view === 'settings' && settingsSubView === 'accounts'} icon={Users} label="글로벌 회원 관리" onClick={() => { setView('settings'); setSettingsSubView('accounts'); }} />
+                )}
 
                 {['admin', 'super_admin'].includes(profile.role) && (
                     <div className="pt-4 border-t border-slate-50">
-                        <SidebarItem active={view === 'settings'} icon={Settings} label="설정" onClick={() => setView('settings')} />
+                        <SidebarItem active={view === 'settings' && settingsSubView !== 'accounts'} icon={Settings} label={profile.role === 'super_admin' ? "시스템 인프라 관리" : "시스템 설정"} onClick={() => { setView('settings'); if (settingsSubView === 'accounts') setSettingsSubView('bizDays'); }} />
                         <AnimatePresence>
-                            {view === 'settings' && (
+                            {(view === 'settings' && (profile.role !== 'super_admin' || settingsSubView !== 'accounts')) && (
                                 <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="ml-8 mt-2 space-y-1 overflow-hidden border-l-2 pl-4">
                                     {[
+                                        ...(profile.role === 'super_admin' ? [{ id: 'dashboard', name: '운영 현황' }] : []),
                                         { id: 'bizDays', name: '영업일수' }, { id: 'org', name: '조직 및 인원' }, { id: 'types', name: '유형명' },
-                                        { id: 'data', name: '판매 데이터' }, { id: 'accounts', name: '멤버 관리' }
+                                        { id: 'data', name: '판매 데이터' }, 
+                                        ...(profile.role === 'super_admin' ? [{ id: 'inquiries', name: '전체 고객 문의' }, { id: 'notices', name: '공지사항 관리' }] : []),
+                                        ...(profile.role !== 'super_admin' ? [{ id: 'accounts', name: '멤버 관리' }] : [])
                                     ].map(sub => (
                                         <button key={sub.id} onClick={() => setSettingsSubView(sub.id)} className={`block w-full text-left py-2 text-sm font-black transition-all ${settingsSubView === sub.id ? 'text-indigo-600 scale-105' : 'text-slate-400'}`}>
                                             {sub.name}
@@ -44,7 +55,7 @@ export function Sidebar({ view, setView, profile, isDemo, settingsSubView, setSe
                 )}
 
                 <div className="pt-4 mt-4 border-t border-slate-100 space-y-2">
-                    <SidebarItem active={view === 'pricing'} icon={CreditCard} label="Pricing" onClick={() => setView('pricing')} />
+                    {profile.role !== 'super_admin' && <SidebarItem active={view === 'pricing'} icon={CreditCard} label="Pricing" onClick={() => setView('pricing')} />}
                     <SidebarItem active={view === 'support'} icon={MessageSquare} label="Support" onClick={() => setView('support')} />
                     <button onClick={onLogout} className="mt-8 text-xs font-bold text-slate-400 hover:text-rose-500 w-full text-left px-4">로그아웃</button>
                 </div>

@@ -6,7 +6,7 @@ import { BusinessDaysSubView } from './settings/BusinessDaysSubView';
 import { OrganizationSubView } from './settings/OrganizationSubView';
 import { TypesSubView } from './settings/TypesSubView';
 import { DataUploadSubView } from './settings/DataUploadSubView';
-import { AccountsSubView, LogsSubView, SuperAdminManageSubView } from './settings/AdminSubViews';
+import { AccountsSubView, LogsSubView, SuperAdminManageSubView, SuperAdminDashboardSubView, SuperAdminInquiriesSubView, SuperAdminNoticeSubView } from './settings/AdminSubViews';
 
 export function SettingsView({ 
     masterData, 
@@ -14,7 +14,8 @@ export function SettingsView({
     selectedMonth, 
     subView, 
     profile, 
-    isDemo 
+    isDemo,
+    onImpersonate
 }) {
     const [selectedYear, setSelectedYear] = useState('2026');
 
@@ -23,8 +24,11 @@ export function SettingsView({
             bizDays: { main: 'Business Days', sub: '영업일수 및 공휴일 상세 설정' },
             org: { main: 'Organization', sub: '조직 및 인원 구성 관리' },
             types: { main: 'Type Definitions', sub: '시스템 유형 및 코드 관리' },
-            accounts: { main: 'Member Management', sub: profile?.role === 'super_admin' ? '전체 사용자 권한 및 플랜 관리' : '멤버 초대 및 권한 승인' },
+            accounts: { main: 'Global Members', sub: profile?.role === 'super_admin' ? '전체 사용자 권한 및 플랜 관리' : '멤버 초대 및 권한 승인' },
             logs: { main: 'Access Logs', sub: '시스템 접속 이력 모니터링' },
+            dashboard: { main: 'Ops Metrics', sub: '시스템 실시간 운영 및 지표 현황' },
+            inquiries: { main: 'Customer Support', sub: '시스템 전체 1:1 문의 통합 관리' },
+            notices: { main: 'System Notices', sub: '전체 사용자 공지사항 관리' },
             data: { main: 'Sales Data Center', sub: '매출 및 목표 데이터 업로드' }
         };
 
@@ -92,10 +96,13 @@ export function SettingsView({
                     {subView === 'data' && <DataUploadSubView setMasterData={setMasterData} masterData={masterData} profile={profile} isDemo={isDemo} />}
                     {subView === 'accounts' && (
                         profile?.role === 'super_admin' 
-                        ? <SuperAdminManageSubView isDemo={isDemo} /> 
+                        ? <SuperAdminManageSubView isDemo={isDemo} onImpersonate={onImpersonate} /> 
                         : <AccountsSubView profile={profile} isDemo={isDemo} />
                     )}
                     {subView === 'logs' && <LogsSubView profile={profile} isDemo={isDemo} />}
+                    {subView === 'dashboard' && <SuperAdminDashboardSubView />}
+                    {subView === 'inquiries' && <SuperAdminInquiriesSubView />}
+                    {subView === 'notices' && <SuperAdminNoticeSubView isDemo={isDemo} />}
                 </motion.div>
             </AnimatePresence>
         </div>
