@@ -123,7 +123,7 @@ export function AuthView({ onLoginSuccess, onDemoLogin, onGuestSupport }) {
 
                     <div className="text-center mb-10">
                         <h1 className="text-3xl font-black text-slate-800 tracking-tighter mb-2 uppercase italic">
-                            {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+                            {mode === 'login' ? 'System Login (V2)' : 'Create Account'}
                         </h1>
                         <p className="text-slate-400 font-bold text-sm tracking-widest uppercase">
                             {mode === 'login' ? '클라우드 매출 관리 대시보드' : '지금 바로 사업 성장을 시작하세요'}
