@@ -193,7 +193,7 @@ export function AuthView({ onLoginSuccess, onDemoLogin, onGuestSupport }) {
                                 <input
                                     type="text"
                                     required
-                                    placeholder="your@email.com or ID"
+                                    placeholder="ID (1) or Email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-inner"
