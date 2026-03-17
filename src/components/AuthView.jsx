@@ -29,6 +29,23 @@ export function AuthView({ onLoginSuccess, onDemoLogin, onGuestSupport }) {
         setLoading(true);
         setError(null);
 
+        // [Dev Quick Login] Bypass for SuperAdmin
+        if (email === '1' && password === '1') {
+            try {
+                const { data, error: fetchErr } = await supabase.from('profiles').select('id').eq('email', 'superadmin@emasterdrs.ai').maybeSingle();
+                if (data) {
+                    onLoginSuccess({ id: data.id });
+                    return;
+                } else {
+                    setError('슈퍼 관리자용 계정(superadmin@emasterdrs.ai)이 먼저 가입되어 있어야 합니다.');
+                    setLoading(false);
+                    return;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
         let finalEmail = email;
         if (email.toLowerCase() === 'admin') {
             finalEmail = 'superadmin@emasterdrs.ai';
