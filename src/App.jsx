@@ -88,7 +88,7 @@ export default function App() {
     }
 
     if (!session) return <AuthView onLoginSuccess={u => fetchProfile(u.id)} onDemoLogin={handleDemoLogin} onGuestSupport={() => setView('support')} />;
-    if (!profile?.company_id && !isDemo) return <OnboardingView user={session.user} onComplete={() => fetchProfile(session.user.id)} />;
+    if (!profile?.company_id && !isDemo && profile?.role !== 'super_admin') return <OnboardingView user={session.user} onComplete={() => fetchProfile(session.user.id)} />;
 
     return (
         <div className="h-screen bg-slate-50 dark:bg-[#020617] flex overflow-hidden font-['Gmarket']">
