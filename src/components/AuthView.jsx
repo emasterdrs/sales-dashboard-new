@@ -29,9 +29,16 @@ export function AuthView({ onLoginSuccess, onDemoLogin, onGuestSupport }) {
         setLoading(true);
         setError(null);
 
+        let finalEmail = email;
+        if (email.toLowerCase() === 'admin') {
+            finalEmail = 'superadmin@emasterdrs.ai';
+        } else if (email.toLowerCase() === 'master') {
+            finalEmail = 'emasterdrs@gmail.com';
+        }
+
         try {
             const { data, error: loginErr } = await supabase.auth.signInWithPassword({
-                email,
+                email: finalEmail,
                 password,
             });
 
@@ -167,9 +174,9 @@ export function AuthView({ onLoginSuccess, onDemoLogin, onGuestSupport }) {
                             <div className="relative group">
                                 <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                                 <input
-                                    type="email"
+                                    type="text"
                                     required
-                                    placeholder="your@email.com"
+                                    placeholder="your@email.com or ID"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-inner"
